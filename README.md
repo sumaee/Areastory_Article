@@ -1,2 +1,2 @@
 # Areastory-Article
-Areastory 보완
+Areastory(https://github.com/sumaee/AreaStory) 보완
