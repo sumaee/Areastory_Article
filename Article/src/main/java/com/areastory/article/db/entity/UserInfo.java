@@ -12,7 +12,7 @@ import javax.persistence.Id;
 @Entity
 @Getter
 @NoArgsConstructor
-public class User {
+public class UserInfo {
     @Id
     private Long userId;
     @Setter
@@ -26,7 +26,7 @@ public class User {
     private Long providerId;
 
     @Builder
-    public User(Long userId, String nickname, String profile, String provider, Long providerId) {
+    public UserInfo(Long userId, String nickname, String profile, String provider, Long providerId) {
         this.userId = userId;
         this.nickname = nickname;
         this.profile = profile;

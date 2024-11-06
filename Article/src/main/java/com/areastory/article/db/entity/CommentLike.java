@@ -17,7 +17,7 @@ public class CommentLike extends BaseTime {
     @JoinColumn(name = "user_id")
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private User user;
+    private UserInfo user;
 
     @Id
     @JoinColumn(name = "comment_id")
@@ -25,7 +25,7 @@ public class CommentLike extends BaseTime {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Comment comment;
 
-    public CommentLike(User user, Comment comment) {
+    public CommentLike(UserInfo user, Comment comment) {
         this.user = user;
         this.comment = comment;
     }

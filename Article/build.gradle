@@ -1,21 +1,14 @@
-//querydsl 추가
-buildscript {
-    ext {
-        queryDslVersion = "5.0.0"
-    }
-}
-
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.7.5'
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
-    // querydsl
-    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
+    id 'com.ewerk.gradle.plugins.querydsl' version '1.0.10'
 }
 
 group = 'com.areastory'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
+
 
 configurations {
     compileOnly {
@@ -28,63 +21,75 @@ repositories {
 }
 
 dependencies {
+
+    //jpa
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    //querydsl
+    implementation 'com.querydsl:querydsl-jpa'
+    annotationProcessor "com.querydsl:querydsl-apt"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    //aws
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    compileOnly 'org.springframework.cloud:spring-cloud-starter-aws:2.0.2.RELEASE'
+
+    //lombok
     compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.h2database:h2'
-//    runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.kafka:spring-kafka-test'
-    implementation 'commons-io:commons-io:2.11.0'
+
+    //spring boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    //mysql database
+//    runtimeOnly 'com.mysql:mysql-connector-j'
 
     //postgresql
     implementation 'org.postgresql:postgresql:42.7.2'
     runtimeOnly 'org.postgresql:postgresql'
 
-    //querydsl 추가
-    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
-    implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
-    //aws 추가
-    implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.3.1'
-
     //kafka
     implementation 'org.springframework.kafka:spring-kafka'
-    implementation 'com.google.firebase:firebase-admin:9.1.1'
 
-    //redis 추가
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    //websocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.webjars:sockjs-client:1.1.2'
+    implementation 'org.webjars:stomp-websocket:2.3.3-1'
 
-    //interceptor servlet 추가
-    implementation 'javax.servlet:javax.servlet-api:4.0.1'
+    //test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    runtimeOnly 'com.h2database:h2'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+
 }
+//
+//test {
+//    useJUnitPlatform()
+//}
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
-//querydsl 추가 시작
 def querydslDir = "$buildDir/generated/querydsl"
+
 querydsl {
+    library = "com.querydsl:querydsl-apt"
     jpa = true
     querydslSourcesDir = querydslDir
 }
+
 sourceSets {
     main.java.srcDir querydslDir
 }
-//configurations {
-//	querydsl.extendsFrom compileClasspath
-//}
 
 configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
     querydsl.extendsFrom compileClasspath
 }
 
 compileQuerydsl {
     options.annotationProcessorPath = configurations.querydsl
 }
-//querydsl 추가 끝
+jar {
+    enabled = false
+}

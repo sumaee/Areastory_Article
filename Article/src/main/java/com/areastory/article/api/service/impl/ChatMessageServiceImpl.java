@@ -3,7 +3,7 @@ package com.areastory.article.api.service.impl;
 import com.areastory.article.api.service.ChatMessageService;
 import com.areastory.article.db.entity.ChatMessage;
 import com.areastory.article.db.entity.ChatRoom;
-import com.areastory.article.db.entity.User;
+import com.areastory.article.db.entity.UserInfo;
 import com.areastory.article.db.repository.ChatMessageRepository;
 import com.areastory.article.db.repository.ChatRoomRepository;
 import com.areastory.article.db.repository.UserRepository;
@@ -49,7 +49,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     @Transactional
     @Override
     public ChatMessageResp saveMessage(ChatMessageReq messageReq) {
-        User user = userRepository.findById(messageReq.getUserId())
+        UserInfo user = userRepository.findById(messageReq.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //채팅 내역 저장
@@ -78,7 +78,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     @Transactional
     @Override
     public ChatMessageEnterResp enterRoom(ChatMessageReq messageReq) {
-        User user = userRepository.findById(messageReq.getUserId())
+        UserInfo user = userRepository.findById(messageReq.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //방인원수 증가
@@ -99,7 +99,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     @Transactional
     @Override
     public ChatMessageQuitResp outRoom(ChatMessageReq messageReq) {
-        User user = userRepository.findById(messageReq.getUserId())
+        UserInfo user = userRepository.findById(messageReq.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         //방인원수 감소
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(messageReq.getRoomId());

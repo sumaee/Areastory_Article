@@ -16,7 +16,7 @@ public class Chatting {
     @JoinColumn(name = "user_id")
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private User user;
+    private UserInfo user;
 
     @Id
     @JoinColumn(name = "room_id")
@@ -24,7 +24,7 @@ public class Chatting {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private ChatRoom chatRoom;
 
-    public Chatting(User user, ChatRoom chatRoom) {
+    public Chatting(UserInfo user, ChatRoom chatRoom) {
         this.user = user;
         this.chatRoom = chatRoom;
     }

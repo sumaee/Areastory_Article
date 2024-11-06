@@ -30,7 +30,7 @@ public class Article extends BaseTime {
     @ManyToOne
     @JoinColumn(name = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private User user;
+    private UserInfo user;
 
     @Column(length = 100)
     private String content;
@@ -59,7 +59,7 @@ public class Article extends BaseTime {
 
 
     @Builder
-    public Article(Long articleId, User user, String content, String image, String thumbnail, Long dailyLikeCount, Long totalLikeCount, Long commentCount, String dosi, String sigungu, String dongeupmyeon, Boolean publicYn) {
+    public Article(Long articleId, UserInfo user, String content, String image, String thumbnail, Long dailyLikeCount, Long totalLikeCount, Long commentCount, String dosi, String sigungu, String dongeupmyeon, Boolean publicYn) {
         this.articleId = articleId;
         this.user = user;
         this.content = content;

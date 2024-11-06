@@ -17,7 +17,7 @@ public class ArticleLike extends BaseTime {
     @JoinColumn(name = "user_id")
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private User user;
+    private UserInfo user;
 
     @Id
     @JoinColumn(name = "article_id")
@@ -25,7 +25,7 @@ public class ArticleLike extends BaseTime {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Article article;
 
-    public ArticleLike(User user, Article article) {
+    public ArticleLike(UserInfo user, Article article) {
         this.user = user;
         this.article = article;
     }

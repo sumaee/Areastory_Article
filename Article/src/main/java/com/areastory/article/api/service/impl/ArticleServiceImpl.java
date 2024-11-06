@@ -4,7 +4,7 @@ import com.areastory.article.api.service.ArticleService;
 import com.areastory.article.db.entity.Article;
 import com.areastory.article.db.entity.ArticleLike;
 import com.areastory.article.db.entity.ArticleLikePK;
-import com.areastory.article.db.entity.User;
+import com.areastory.article.db.entity.UserInfo;
 import com.areastory.article.db.repository.ArticleLikeRepository;
 import com.areastory.article.db.repository.ArticleRepository;
 import com.areastory.article.db.repository.UserRepository;
@@ -47,7 +47,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     @Override
     public void addArticle(ArticleWriteReq articleWriteReq, MultipartFile picture) {
-        User user = userRepository.findById(articleWriteReq.getUserId()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        UserInfo user = userRepository.findById(articleWriteReq.getUserId()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String imageUrl = "";
         String thumbnail = "";
@@ -132,7 +132,7 @@ public class ArticleServiceImpl implements ArticleService {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE);
         }
         Article article = articleRepository.findById(articleId).orElseThrow(() -> new CustomException(ErrorCode.ARTICLE_NOT_FOUND));
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        UserInfo user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         ArticleLike articleLike = articleLikeRepository.save(new ArticleLike(user, article));
         article.addTotalLikeCount();
         notificationProducer.send(articleLike);

@@ -1,7 +1,7 @@
 package com.areastory.article.api.service.impl;
 
 import com.areastory.article.api.service.UserService;
-import com.areastory.article.db.entity.User;
+import com.areastory.article.db.entity.UserInfo;
 import com.areastory.article.db.repository.UserRepository;
 import com.areastory.article.dto.common.UserKafkaDto;
 import com.areastory.article.exception.CustomException;
@@ -18,7 +18,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void addUser(UserKafkaDto userKafkaDto) {
-        userRepository.save(User.builder()
+        userRepository.save(UserInfo.builder()
                 .userId(userKafkaDto.getUserId())
                 .nickname(userKafkaDto.getNickname())
                 .profile(userKafkaDto.getProfile())
@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(UserKafkaDto userKafkaDto) {
-        User user = userRepository.findById(userKafkaDto.getUserId()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        UserInfo user = userRepository.findById(userKafkaDto.getUserId()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         user.setNickname(userKafkaDto.getNickname());
         user.setProfile(userKafkaDto.getProfile());
     }

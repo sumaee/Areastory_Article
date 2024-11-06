@@ -17,7 +17,7 @@ public class ChatMessage extends BaseTime {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user; //보내는 사람 -> 추후 user로 변경
+    private UserInfo user; //보내는 사람 -> 추후 user로 변경
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -27,7 +27,7 @@ public class ChatMessage extends BaseTime {
     private ChatRoom chatRoom;
 
     @Builder
-    public ChatMessage(User user, String content, ChatRoom chatRoom) {
+    public ChatMessage(UserInfo user, String content, ChatRoom chatRoom) {
         this.user = user;
         this.content = content;
         this.chatRoom = chatRoom;

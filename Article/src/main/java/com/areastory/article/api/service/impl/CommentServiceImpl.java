@@ -102,7 +102,7 @@ public class CommentServiceImpl implements CommentService {
         if (commentLikeRepository.existsById(new CommentLikePK(userId, commentId))) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE);
         }
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        UserInfo user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
         CommentLike commentLike = commentLikeRepository.save(new CommentLike(user, comment));
         comment.addLikeCount();
@@ -115,7 +115,7 @@ public class CommentServiceImpl implements CommentService {
         if (!commentLikeRepository.existsById(new CommentLikePK(userId, commentId))) {
             throw new CustomException(ErrorCode.LIKE_NOT_FOUND);
         }
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        UserInfo user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
         commentLikeRepository.delete(new CommentLike(user, comment));
         comment.removeLikeCount();

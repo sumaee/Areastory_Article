@@ -30,7 +30,7 @@ public class Comment extends BaseTime {
     @ManyToOne
     @JoinColumn(name = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private User user;
+    private UserInfo user;
 
     @ManyToOne
     @JoinColumn(name = "article_id")
@@ -39,7 +39,7 @@ public class Comment extends BaseTime {
 
 
     @Builder
-    public Comment(String content, User user, Article article) {
+    public Comment(String content, UserInfo user, Article article) {
         this.content = content;
         this.user = user;
         this.article = article;
