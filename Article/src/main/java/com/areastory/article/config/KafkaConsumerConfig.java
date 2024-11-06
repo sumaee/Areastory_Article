@@ -5,6 +5,7 @@ import com.areastory.article.dto.common.UserKafkaDto;
 import com.areastory.article.kafka.KafkaProperties;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.LongDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -19,6 +20,8 @@ import java.util.Map;
 
 @Configuration
 public class KafkaConsumerConfig {
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Long, UserKafkaDto>>
     userContainerFactory() {
@@ -54,7 +57,7 @@ public class KafkaConsumerConfig {
     @Bean
     public Map<String, Object> jsonConsumerConfigs() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaProperties.KAFKA_URL);
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         return props;
