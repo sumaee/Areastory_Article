@@ -1,0 +1,46 @@
+server:
+  port: 5001
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  profiles:
+    include: API-KEY
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER}
+    url: ${DB_URL}
+    password: ${DB_PASSWORD}
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
+    show-sql: true
+    generate-ddl: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+#  redis:
+#    host: ${REDIS_URL}
+#    port: ${REDIS_PORT}
+
+cloud:
+  aws:
+    s3:
+      bucket: ${BUCKET_NAME}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
