@@ -14,13 +14,7 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @DynamicInsert
-@Table(name = "article"
-//        , indexes = {@Index(name = "idx_location1", columnList = "daily_like_count"),
-//        @Index(name = "idx_location2", columnList = "dosi,daily_like_count"),
-//        @Index(name = "idx_location3", columnList = "dosi,sigungu,daily_like_count"),
-//        @Index(name = "idx_location4", columnList = "dosi,sigungu,dongeupmyeon,daily_like_count")
-//}
-)
+@Table(name = "article")
 public class Article extends BaseTime {
 
     @Id
