@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -70,6 +71,11 @@ public class ArticleServiceImpl implements ArticleService {
                 .build());
 
         articleProducer.send(article, KafkaProperties.INSERT);
+    }
+
+    @Override
+    public List<ArticleDto> selectAllArticleTest(ArticleReq articleReq, Pageable pageable) {
+        return articleRepository.findAllTest(articleReq, pageable);
     }
 
     @Override

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.List;
 import static com.areastory.article.db.entity.QArticle.article;
 import static com.areastory.article.db.entity.QArticleLike.articleLike;
 import static com.areastory.article.db.entity.QFollow.follow;
+import static com.areastory.article.db.entity.QUserInfo.userInfo;
 
 
 @Repository
@@ -34,8 +36,8 @@ public class ArticleSupportRepositoryImpl implements ArticleSupportRepository {
     @Override
     public Page<ArticleDto> findAll(ArticleReq articleReq, Pageable pageable) {
         List<ArticleDto> articleList = getArticlesQuery(articleReq.getUserId())
-                .where(article.publicYn.eq(true), eqDosi(articleReq.getDosi()), eqSigungu(articleReq.getSigungu()),
-                        eqDongeupmyeon(articleReq.getDongeupmyeon()))
+                .where(eqDosi(articleReq.getDosi()), eqSigungu(articleReq.getSigungu()),
+                        eqDongeupmyeon(articleReq.getDongeupmyeon()), article.publicYn.eq(true))
                 .orderBy(getOrderSpecifier(pageable).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -47,6 +49,25 @@ public class ArticleSupportRepositoryImpl implements ArticleSupportRepository {
 
         return PageableExecutionUtils.getPage(articleList, pageable, articleSize::fetchOne);
     }
+@Override
+public List<ArticleDto> findAllTest(ArticleReq articleReq, Pageable pageable) {
+    List<Long> idx = query.select(article.articleId)
+            .from(article)
+            .where(eqDosi(articleReq.getDosi()), eqSigungu(articleReq.getSigungu()),
+                    eqDongeupmyeon(articleReq.getDongeupmyeon()), article.publicYn.eq(true))
+            .orderBy(getOrderSpecifier(pageable).toArray(OrderSpecifier[]::new))
+            .limit(pageable.getPageSize())
+            .offset(pageable.getOffset())
+            .fetch();
+
+    if(CollectionUtils.isEmpty(idx))
+        return new ArrayList<>();
+
+    return getArticlesQuery(articleReq.getUserId())
+            .where(article.articleId.in(idx))
+            .orderBy(getOrderSpecifier(pageable).toArray(OrderSpecifier[]::new))
+            .fetch();
+}
 
     @Override
     public ArticleDto findById(Long userId, Long articleId) {

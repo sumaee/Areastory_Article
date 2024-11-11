@@ -1,6 +1,7 @@
 package com.areastory.article.api.controller;
 
 import com.areastory.article.api.service.ArticleService;
+import com.areastory.article.dto.common.ArticleDto;
 import com.areastory.article.dto.request.ArticleReq;
 import com.areastory.article.dto.request.ArticleUpdateParam;
 import com.areastory.article.dto.request.ArticleWriteReq;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,9 +43,15 @@ public class ArticleController {
     모든 게시물 불러오기
     한페이지당 개수는 15개, 정렬은 좋아요 순으로
      */
+    @GetMapping("/test")
+    public ResponseEntity<List<ArticleDto>> selectAllArticleTest(ArticleReq articleReq,
+                                                             @PageableDefault(sort = {"likeCount"}, direction = Sort.Direction.DESC, size = 15) Pageable pageable){
+        return ResponseEntity.ok(articleService.selectAllArticleTest(articleReq, pageable));
+    }
+
     @GetMapping
     public ResponseEntity<?> selectAllArticle(ArticleReq articleReq,
-                                              @PageableDefault(sort = {"likeCount"}, direction = Sort.Direction.DESC, size = 15) Pageable pageable) {
+                                                             @PageableDefault(sort = {"likeCount"}, direction = Sort.Direction.DESC, size = 15) Pageable pageable){
         return ResponseEntity.ok(articleService.selectAllArticle(articleReq, pageable));
     }
 
