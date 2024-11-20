@@ -1,5 +1,6 @@
 package com.areastory.article.kafka;
 
+import com.areastory.article.config.properties.KafkaProperties;
 import com.areastory.article.db.entity.Article;
 import com.areastory.article.dto.common.ArticleKafkaDto;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ArticleProducer {
     private final KafkaTemplate<Long, ArticleKafkaDto> articleTemplate;
+    private final KafkaProperties kafkaProperties;
 
     public void send(Article article, String type) {
         ArticleKafkaDto articleKafkaDto = ArticleKafkaDto.builder()
@@ -27,6 +29,6 @@ public class ArticleProducer {
                 .dongeupmyeon(article.getDongeupmyeon())
                 .publicYn(article.getPublicYn())
                 .build();
-        articleTemplate.send(new ProducerRecord<>(KafkaProperties.TOPIC_ARTICLE, article.getUser().getUserId(), articleKafkaDto));
+        articleTemplate.send(new ProducerRecord<>(kafkaProperties.getTopic().getArticle(), article.getUser().getUserId(), articleKafkaDto));
     }
 }

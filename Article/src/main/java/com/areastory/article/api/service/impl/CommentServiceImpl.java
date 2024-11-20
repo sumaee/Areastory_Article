@@ -1,6 +1,7 @@
 package com.areastory.article.api.service.impl;
 
 import com.areastory.article.api.service.CommentService;
+import com.areastory.article.config.properties.KafkaProperties;
 import com.areastory.article.db.entity.*;
 import com.areastory.article.db.repository.ArticleRepository;
 import com.areastory.article.db.repository.CommentLikeRepository;
@@ -17,8 +18,6 @@ import com.areastory.article.dto.response.LikeResp;
 import com.areastory.article.exception.CustomException;
 import com.areastory.article.exception.ErrorCode;
 import com.areastory.article.kafka.ArticleProducer;
-import com.areastory.article.kafka.KafkaProperties;
-import com.areastory.article.kafka.NotificationProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,8 +34,9 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final ArticleRepository articleRepository;
     private final CommentLikeRepository commentLikeRepository;
-    private final NotificationProducer notificationProducer;
+    //    private final NotificationProducer notificationProducer;
     private final ArticleProducer articleProducer;
+    private final KafkaProperties kafkaProperties;
 
     @Override
     @Transactional
@@ -50,8 +50,8 @@ public class CommentServiceImpl implements CommentService {
                 .content(commentWriteReq.getContent())
                 .article(article)
                 .build());
-        notificationProducer.send(comment);
-        articleProducer.send(article, KafkaProperties.UPDATE);
+//        notificationProducer.send(comment);
+        articleProducer.send(article, kafkaProperties.getCommand().getUpdate());
     }
 
     @Override
@@ -93,7 +93,7 @@ public class CommentServiceImpl implements CommentService {
         article.deleteCommentCount();
         //comment 삭제하기
         commentRepository.deleteById(comment.getCommentId());
-        articleProducer.send(article, KafkaProperties.UPDATE);
+        articleProducer.send(article, kafkaProperties.getCommand().getUpdate());
     }
 
     @Override
@@ -106,7 +106,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
         CommentLike commentLike = commentLikeRepository.save(new CommentLike(user, comment));
         comment.addLikeCount();
-        notificationProducer.send(commentLike);
+//        notificationProducer.send(commentLike);
     }
 
     @Override

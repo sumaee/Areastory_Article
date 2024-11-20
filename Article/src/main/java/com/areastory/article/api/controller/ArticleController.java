@@ -49,6 +49,7 @@ public class ArticleController {
         return ResponseEntity.ok(articleService.selectAllArticleTest(articleReq, pageable));
     }
 
+    // TODO : 페이지네이션된 함수 -> 추후 지울 것
     @GetMapping
     public ResponseEntity<?> selectAllArticle(ArticleReq articleReq,
                                                              @PageableDefault(sort = {"likeCount"}, direction = Sort.Direction.DESC, size = 15) Pageable pageable){

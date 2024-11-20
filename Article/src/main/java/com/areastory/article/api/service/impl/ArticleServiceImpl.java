@@ -1,6 +1,7 @@
 package com.areastory.article.api.service.impl;
 
 import com.areastory.article.api.service.ArticleService;
+import com.areastory.article.config.properties.KafkaProperties;
 import com.areastory.article.db.entity.Article;
 import com.areastory.article.db.entity.ArticleLike;
 import com.areastory.article.db.entity.ArticleLikePK;
@@ -18,8 +19,6 @@ import com.areastory.article.dto.response.LikeResp;
 import com.areastory.article.exception.CustomException;
 import com.areastory.article.exception.ErrorCode;
 import com.areastory.article.kafka.ArticleProducer;
-import com.areastory.article.kafka.KafkaProperties;
-import com.areastory.article.kafka.NotificationProducer;
 import com.areastory.article.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,8 +41,10 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleLikeRepository articleLikeRepository;
     private final UserRepository userRepository;
     private final FileUtil fileUtil;
-    private final NotificationProducer notificationProducer;
+//    private final NotificationProducer notificationProducer;
     private final ArticleProducer articleProducer;
+    private final KafkaProperties kafkaProperties;
+
 
     @Transactional
     @Override
@@ -70,7 +71,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .dongeupmyeon(articleWriteReq.getDongeupmyeon())
                 .build());
 
-        articleProducer.send(article, KafkaProperties.INSERT);
+        articleProducer.send(article, kafkaProperties.getCommand().getInsert());
     }
 
     @Override
@@ -116,7 +117,7 @@ public class ArticleServiceImpl implements ArticleService {
             article.updatePublicYn(param.getPublicYn());
         }
 
-        articleProducer.send(article, KafkaProperties.UPDATE);
+        articleProducer.send(article, kafkaProperties.getCommand().getUpdate());
     }
 
     @Transactional
@@ -128,7 +129,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
         fileUtil.deleteFile(article.getImage());
         articleRepository.delete(article);
-        articleProducer.send(article, KafkaProperties.DELETE);
+        articleProducer.send(article, kafkaProperties.getCommand().getDelete());
     }
 
     @Transactional
@@ -141,8 +142,8 @@ public class ArticleServiceImpl implements ArticleService {
         UserInfo user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         ArticleLike articleLike = articleLikeRepository.save(new ArticleLike(user, article));
         article.addTotalLikeCount();
-        notificationProducer.send(articleLike);
-        articleProducer.send(article, KafkaProperties.UPDATE);
+//        notificationProducer.send(articleLike);
+        articleProducer.send(article, kafkaProperties.getCommand().getUpdate());
     }
 
     @Transactional
@@ -163,7 +164,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
         article.removeTotalLikeCount();
         articleLikeRepository.deleteById(articleLikePK);
-        articleProducer.send(article, KafkaProperties.UPDATE);
+        articleProducer.send(article, kafkaProperties.getCommand().getUpdate());
     }
 
     @Override

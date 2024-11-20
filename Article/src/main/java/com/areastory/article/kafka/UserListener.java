@@ -2,6 +2,7 @@ package com.areastory.article.kafka;
 
 import com.areastory.article.api.service.FollowService;
 import com.areastory.article.api.service.UserService;
+import com.areastory.article.config.properties.KafkaProperties;
 import com.areastory.article.dto.common.FollowKafkaDto;
 import com.areastory.article.dto.common.UserKafkaDto;
 import lombok.RequiredArgsConstructor;
@@ -14,34 +15,28 @@ public class UserListener {
     private final UserService userService;
     private final UserReplyProducer userReplyProducer;
     private final FollowService followService;
+    private final KafkaProperties kafkaProperties;
 
-    @KafkaListener(id = KafkaProperties.GROUP_NAME_USER, topics = KafkaProperties.TOPIC_USER, containerFactory = "userContainerFactory")
+    @KafkaListener(id = "${kafka.group.user}", topics = "${kafka.topic.user}", containerFactory = "userContainerFactory")
     public void userListen(UserKafkaDto userKafkaDto) {
-        System.out.println(userKafkaDto);
-        switch (userKafkaDto.getType()) {
-            case KafkaProperties.INSERT:
-                userService.addUser(userKafkaDto);
-                userReplyProducer.send(userKafkaDto.getUserId());
-                break;
-            case KafkaProperties.UPDATE:
-                userService.updateUser(userKafkaDto);
-                break;
-            case KafkaProperties.DELETE:
-                userService.deleteUser(userKafkaDto);
-                break;
+        String type = userKafkaDto.getType();
+        if (type.equals(kafkaProperties.getCommand().getInsert())) {
+            userService.addUser(userKafkaDto);
+            userReplyProducer.send(userKafkaDto.getUserId());
+        }else if(type.equals(kafkaProperties.getCommand().getUpdate())){
+            userService.updateUser(userKafkaDto);
+        }else if(type.equals(kafkaProperties.getCommand().getDelete())){
+            userService.deleteUser(userKafkaDto);
         }
     }
 
-    @KafkaListener(id = KafkaProperties.GROUP_NAME_FOLLOW, topics = KafkaProperties.TOPIC_FOLLOW, containerFactory = "followContainerFactory")
+    @KafkaListener(id = "${kafka.group.follow}", topics = "${kafka.topic.follow}", containerFactory = "followContainerFactory")
     public void followListen(FollowKafkaDto followKafkaDto) {
-        System.out.println(followKafkaDto);
-        switch (followKafkaDto.getType()) {
-            case KafkaProperties.INSERT:
-                followService.addFollow(followKafkaDto);
-                break;
-            case KafkaProperties.DELETE:
-                followService.deleteFollow(followKafkaDto);
-                break;
+        String type = followKafkaDto.getType();
+        if(type.equals(kafkaProperties.getCommand().getInsert())){
+            followService.addFollow(followKafkaDto);
+        }else if(type.equals(kafkaProperties.getCommand().getDelete())){
+            followService.deleteFollow(followKafkaDto);
         }
     }
 }
