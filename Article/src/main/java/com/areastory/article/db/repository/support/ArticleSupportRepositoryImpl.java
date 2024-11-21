@@ -25,7 +25,6 @@ import java.util.List;
 import static com.areastory.article.db.entity.QArticle.article;
 import static com.areastory.article.db.entity.QArticleLike.articleLike;
 import static com.areastory.article.db.entity.QFollow.follow;
-import static com.areastory.article.db.entity.QUserInfo.userInfo;
 
 
 @Repository
@@ -34,40 +33,24 @@ public class ArticleSupportRepositoryImpl implements ArticleSupportRepository {
     private final JPAQueryFactory query;
 
     @Override
-    public Page<ArticleDto> findAll(ArticleReq articleReq, Pageable pageable) {
-        List<ArticleDto> articleList = getArticlesQuery(articleReq.getUserId())
+    public List<ArticleDto> findAll(ArticleReq articleReq, Pageable pageable) {
+        List<Long> idx = query.select(article.articleId)
+                .from(article)
                 .where(eqDosi(articleReq.getDosi()), eqSigungu(articleReq.getSigungu()),
                         eqDongeupmyeon(articleReq.getDongeupmyeon()), article.publicYn.eq(true))
                 .orderBy(getOrderSpecifier(pageable).toArray(OrderSpecifier[]::new))
-                .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
                 .fetch();
 
-        JPAQuery<Long> articleSize = query
-                .select(article.count())
-                .from(article);
+        if (CollectionUtils.isEmpty(idx))
+            return new ArrayList<>();
 
-        return PageableExecutionUtils.getPage(articleList, pageable, articleSize::fetchOne);
+        return getArticlesQuery(articleReq.getUserId())
+                .where(article.articleId.in(idx))
+                .orderBy(getOrderSpecifier(pageable).toArray(OrderSpecifier[]::new))
+                .fetch();
     }
-@Override
-public List<ArticleDto> findAllTest(ArticleReq articleReq, Pageable pageable) {
-    List<Long> idx = query.select(article.articleId)
-            .from(article)
-            .where(eqDosi(articleReq.getDosi()), eqSigungu(articleReq.getSigungu()),
-                    eqDongeupmyeon(articleReq.getDongeupmyeon()), article.publicYn.eq(true))
-            .orderBy(getOrderSpecifier(pageable).toArray(OrderSpecifier[]::new))
-            .limit(pageable.getPageSize())
-            .offset(pageable.getOffset())
-            .fetch();
-
-    if(CollectionUtils.isEmpty(idx))
-        return new ArrayList<>();
-
-    return getArticlesQuery(articleReq.getUserId())
-            .where(article.articleId.in(idx))
-            .orderBy(getOrderSpecifier(pageable).toArray(OrderSpecifier[]::new))
-            .fetch();
-}
 
     @Override
     public ArticleDto findById(Long userId, Long articleId) {
@@ -104,36 +87,25 @@ public List<ArticleDto> findAllTest(ArticleReq articleReq, Pageable pageable) {
     }
 
     @Override
-    public Page<ArticleDto> findMyLikeList(Long userId, Pageable pageable) {
-        List<ArticleDto> myLikeList = getArticlesQuery(userId)
+    public List<ArticleDto> findMyLikeList(Long userId, Pageable pageable) {
+
+        return getArticlesQuery(userId)
                 .where(articleLike.user.userId.eq(userId))
                 .orderBy(getOrderSpecifier(pageable).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-
-        JPAQuery<Long> myLikeListSize = query
-                .select(articleLike.count())
-                .from(articleLike)
-                .where(articleLike.user.userId.eq(userId));
-
-        return PageableExecutionUtils.getPage(myLikeList, pageable, myLikeListSize::fetchOne);
     }
 
+
     @Override
-    public Page<ArticleDto> findAllFollowArticleList(Long userId, Pageable pageable) {
-        List<ArticleDto> followArticleList = getArticlesQuery(userId)
-                .where(article.publicYn.eq(true), (follow.followUser.userId.eq(userId).or(article.user.userId.eq(userId))))
+    public List<ArticleDto> findAllFollowArticleList(Long userId, Pageable pageable) {
+        return getArticlesQuery(userId)
+                .where(article.publicYn.eq(true), (follow.followUser.userId.eq(userId)))
                 .orderBy(getOrderSpecifier(pageable).toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-
-        JPAQuery<Long> articleSize = query
-                .select(article.count())
-                .from(article);
-
-        return PageableExecutionUtils.getPage(followArticleList, pageable, articleSize::fetchOne);
     }
 
     private JPAQuery<ArticleDto> getArticlesQuery(Long userId) {

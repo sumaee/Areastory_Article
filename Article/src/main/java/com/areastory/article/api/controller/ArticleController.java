@@ -44,25 +44,17 @@ public class ArticleController {
     한페이지당 개수는 15개, 정렬은 좋아요 순으로
      */
     @GetMapping("/test")
-    public ResponseEntity<List<ArticleDto>> selectAllArticleTest(ArticleReq articleReq,
-                                                             @PageableDefault(sort = {"likeCount"}, direction = Sort.Direction.DESC, size = 15) Pageable pageable){
-        return ResponseEntity.ok(articleService.selectAllArticleTest(articleReq, pageable));
-    }
-
-    // TODO : 페이지네이션된 함수 -> 추후 지울 것
-    @GetMapping
-    public ResponseEntity<?> selectAllArticle(ArticleReq articleReq,
-                                                             @PageableDefault(sort = {"likeCount"}, direction = Sort.Direction.DESC, size = 15) Pageable pageable){
+    public ResponseEntity<List<ArticleDto>> selectAllArticle(ArticleReq articleReq,
+                                                             @PageableDefault(sort = {"likeCount"}, direction = Sort.Direction.DESC, size = 15) Pageable pageable) {
         return ResponseEntity.ok(articleService.selectAllArticle(articleReq, pageable));
     }
-
 
     /*
     팔로우 한 사람들의 sns
      */
     @GetMapping("/follow")
-    public ResponseEntity<?> selectAllFollowArticle(Long userId,
-                                                    @PageableDefault(sort = {"articleId"}, direction = Sort.Direction.DESC, size = 15) Pageable pageable) {
+    public ResponseEntity<List<ArticleDto>> selectAllFollowArticle(Long userId,
+                                                                   @PageableDefault(sort = {"articleId"}, direction = Sort.Direction.DESC, size = 15) Pageable pageable) {
         return ResponseEntity.ok(articleService.selectAllFollowArticle(userId, pageable));
     }
 
@@ -125,8 +117,8 @@ public class ArticleController {
     내가 좋아요 눌렀던 게시글 목록 보기
      */
     @GetMapping("/myLike/{userId}")
-    public ResponseEntity<?> getMyLikeList(@PathVariable Long userId,
-                                           @PageableDefault(sort = "articleId", direction = Sort.Direction.DESC, size = 15) Pageable pageable) {
+    public ResponseEntity<List<ArticleDto>> getMyLikeList(@PathVariable Long userId,
+                                                          @PageableDefault(sort = "articleId", direction = Sort.Direction.DESC, size = 15) Pageable pageable) {
         return ResponseEntity.ok(articleService.selectMyLikeList(userId, pageable));
     }
 }

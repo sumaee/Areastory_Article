@@ -14,7 +14,6 @@ import com.areastory.article.dto.common.UserDto;
 import com.areastory.article.dto.request.ArticleReq;
 import com.areastory.article.dto.request.ArticleUpdateParam;
 import com.areastory.article.dto.request.ArticleWriteReq;
-import com.areastory.article.dto.response.ArticleResp;
 import com.areastory.article.dto.response.LikeResp;
 import com.areastory.article.exception.CustomException;
 import com.areastory.article.exception.ErrorCode;
@@ -41,7 +40,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleLikeRepository articleLikeRepository;
     private final UserRepository userRepository;
     private final FileUtil fileUtil;
-//    private final NotificationProducer notificationProducer;
+    //    private final NotificationProducer notificationProducer;
     private final ArticleProducer articleProducer;
     private final KafkaProperties kafkaProperties;
 
@@ -75,23 +74,10 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<ArticleDto> selectAllArticleTest(ArticleReq articleReq, Pageable pageable) {
-        return articleRepository.findAllTest(articleReq, pageable);
+    public List<ArticleDto> selectAllArticle(ArticleReq articleReq, Pageable pageable) {
+        return articleRepository.findAll(articleReq, pageable);
     }
 
-    @Override
-    public ArticleResp selectAllArticle(ArticleReq articleReq, Pageable pageable) {
-        Page<ArticleDto> articles = articleRepository.findAll(articleReq, pageable);
-        return ArticleResp.builder()
-                .articles(articles.getContent())
-                .pageSize(articles.getPageable().getPageSize())
-                .totalPageNumber(articles.getTotalPages())
-                .totalCount(articles.getTotalElements())
-                .pageNumber(articles.getPageable().getPageNumber() + 1)
-                .nextPage(articles.hasNext())
-                .previousPage(articles.hasPrevious())
-                .build();
-    }
 
     @Override
     public ArticleDto selectArticle(Long userId, Long articleId) {
@@ -182,30 +168,12 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleResp selectMyLikeList(Long userId, Pageable pageable) {
-        Page<ArticleDto> likes = articleRepository.findMyLikeList(userId, pageable);
-        return ArticleResp.builder()
-                .articles(likes.getContent())
-                .pageSize(likes.getPageable().getPageSize())
-                .totalPageNumber(likes.getTotalPages())
-                .totalCount(likes.getTotalElements())
-                .pageNumber(likes.getPageable().getPageNumber() + 1)
-                .nextPage(likes.hasNext())
-                .previousPage(likes.hasPrevious())
-                .build();
+    public List<ArticleDto> selectMyLikeList(Long userId, Pageable pageable) {
+        return articleRepository.findMyLikeList(userId, pageable);
     }
 
     @Override
-    public ArticleResp selectAllFollowArticle(Long userId, Pageable pageable) {
-        Page<ArticleDto> followArticles = articleRepository.findAllFollowArticleList(userId, pageable);
-        return ArticleResp.builder()
-                .articles(followArticles.getContent())
-                .pageSize(followArticles.getPageable().getPageSize())
-                .totalPageNumber(followArticles.getTotalPages())
-                .totalCount(followArticles.getTotalElements())
-                .pageNumber(followArticles.getPageable().getPageNumber() + 1)
-                .nextPage(followArticles.hasNext())
-                .previousPage(followArticles.hasPrevious())
-                .build();
+    public List<ArticleDto> selectAllFollowArticle(Long userId, Pageable pageable) {
+        return articleRepository.findAllFollowArticleList(userId, pageable);
     }
 }
