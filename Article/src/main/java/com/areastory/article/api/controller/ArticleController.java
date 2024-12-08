@@ -29,10 +29,10 @@ public class ArticleController {
     public ResponseEntity<?> writeArticle(@RequestPart(value = "picture", required = false) MultipartFile picture,
                                           @RequestPart ArticleWriteReq articleWriteReq) throws IOException {
         System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        System.out.println(picture.getName());
-        System.out.println(picture.getContentType());
-        System.out.println(picture.getOriginalFilename());
-        System.out.println(picture.getInputStream());
+//        System.out.println(picture.getName());
+//        System.out.println(picture.getContentType());
+//        System.out.println(picture.getOriginalFilename());
+//        System.out.println(picture.getInputStream());
         System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         articleService.addArticle(articleWriteReq, picture);
 
@@ -41,11 +41,11 @@ public class ArticleController {
 
     /*
     모든 게시물 불러오기
-    한페이지당 개수는 15개, 정렬은 좋아요 순으로
+    한페이지당 개수는 15개, 정렬은 최신 순으로
      */
-    @GetMapping("/test")
+    @GetMapping
     public ResponseEntity<List<ArticleDto>> selectAllArticle(ArticleReq articleReq,
-                                                             @PageableDefault(sort = {"likeCount"}, direction = Sort.Direction.DESC, size = 15) Pageable pageable) {
+                                                             @PageableDefault(sort = {"articleId"}, direction = Sort.Direction.DESC, size = 15) Pageable pageable) {
         return ResponseEntity.ok(articleService.selectAllArticle(articleReq, pageable));
     }
 

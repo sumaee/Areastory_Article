@@ -1,6 +1,9 @@
 package com.areastory.article.db.repository.support;
 
+import com.areastory.article.config.properties.RedisProperties;
+import com.areastory.article.db.entity.Article;
 import com.areastory.article.dto.common.ArticleDto;
+import com.areastory.article.dto.common.LocationDto;
 import com.areastory.article.dto.common.UserDto;
 import com.areastory.article.dto.request.ArticleReq;
 import com.querydsl.core.types.Order;
@@ -31,6 +34,19 @@ import static com.areastory.article.db.entity.QFollow.follow;
 @RequiredArgsConstructor
 public class ArticleSupportRepositoryImpl implements ArticleSupportRepository {
     private final JPAQueryFactory query;
+    private final RedisProperties redisProperties;
+
+    @Override
+    public List<Article> init(LocationDto address) {
+        return query
+                .select(Projections.constructor(Article.class, article.articleId, article.user, article.content, article.image, article.thumbnail, article.dailyLikeCount,
+                        article.totalLikeCount, article.commentCount, article.dosi, article.sigungu, article.dongeupmyeon, article.publicYn))
+                .from(article)
+                .where(eqDosi(address.getDosi()), eqSigungu(address.getSigungu()), eqDongeupmyeon(address.getDongeupmyeon()))
+                .orderBy(article.articleId.desc())
+                .limit(redisProperties.getArticleLimits())
+                .fetch();
+    }
 
     @Override
     public List<ArticleDto> findAll(ArticleReq articleReq, Pageable pageable) {
@@ -49,6 +65,14 @@ public class ArticleSupportRepositoryImpl implements ArticleSupportRepository {
         return getArticlesQuery(articleReq.getUserId())
                 .where(article.articleId.in(idx))
                 .orderBy(getOrderSpecifier(pageable).toArray(OrderSpecifier[]::new))
+                .fetch();
+    }
+
+    @Override
+    public List<ArticleDto> findAllById(Long userId, List<Long> articleId) {
+        return getArticlesQuery(userId)
+                .where(article.articleId.in(articleId))
+                .orderBy(article.articleId.desc())
                 .fetch();
     }
 
@@ -162,6 +186,7 @@ public class ArticleSupportRepositoryImpl implements ArticleSupportRepository {
         }
         return articleOrders;
     }
+
 
     private BooleanExpression eqDosi(String dosi) {
         if (StringUtils.hasText(dosi)) {

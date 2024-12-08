@@ -2,6 +2,7 @@ package com.areastory.article.api.service.impl;
 
 import com.areastory.article.api.service.ArticleService;
 import com.areastory.article.config.properties.KafkaProperties;
+import com.areastory.article.config.properties.RedisProperties;
 import com.areastory.article.db.entity.Article;
 import com.areastory.article.db.entity.ArticleLike;
 import com.areastory.article.db.entity.ArticleLikePK;
@@ -10,6 +11,7 @@ import com.areastory.article.db.repository.ArticleLikeRepository;
 import com.areastory.article.db.repository.ArticleRepository;
 import com.areastory.article.db.repository.UserRepository;
 import com.areastory.article.dto.common.ArticleDto;
+import com.areastory.article.dto.common.LocationDto;
 import com.areastory.article.dto.common.UserDto;
 import com.areastory.article.dto.request.ArticleReq;
 import com.areastory.article.dto.request.ArticleUpdateParam;
@@ -19,9 +21,11 @@ import com.areastory.article.exception.CustomException;
 import com.areastory.article.exception.ErrorCode;
 import com.areastory.article.kafka.ArticleProducer;
 import com.areastory.article.util.FileUtil;
+import com.areastory.article.util.ObjectMapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -31,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,17 +44,18 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleRepository articleRepository;
     private final ArticleLikeRepository articleLikeRepository;
     private final UserRepository userRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final ObjectMapperUtil objectMapperUtil;
+    private final RedisProperties redisProperties;
     private final FileUtil fileUtil;
     //    private final NotificationProducer notificationProducer;
     private final ArticleProducer articleProducer;
     private final KafkaProperties kafkaProperties;
 
-
     @Transactional
     @Override
     public void addArticle(ArticleWriteReq articleWriteReq, MultipartFile picture) {
         UserInfo user = userRepository.findById(articleWriteReq.getUserId()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
         String imageUrl = "";
         String thumbnail = "";
         if (picture != null) {
@@ -70,14 +76,47 @@ public class ArticleServiceImpl implements ArticleService {
                 .dongeupmyeon(articleWriteReq.getDongeupmyeon())
                 .build());
 
+
+        setRedis(new LocationDto(articleWriteReq.getDosi(), articleWriteReq.getSigungu(), articleWriteReq.getDongeupmyeon()), article.getArticleId());
+        setRedis(new LocationDto(articleWriteReq.getDosi(), articleWriteReq.getSigungu()), article.getArticleId());
+        setRedis(new LocationDto(articleWriteReq.getDosi()), article.getArticleId());
         articleProducer.send(article, kafkaProperties.getCommand().getInsert());
+    }
+
+    private void setRedis(LocationDto locationDto, Long articleId) {
+        if (redisTemplate.opsForList().size(locationDto.toString()) == (long) redisProperties.getArticleLimits()) {
+            redisTemplate.opsForList().rightPop(locationDto.toString());
+        }
+        redisTemplate.opsForList().leftPush(locationDto.toString(), objectMapperUtil.toString(articleId));
     }
 
     @Override
     public List<ArticleDto> selectAllArticle(ArticleReq articleReq, Pageable pageable) {
-        return articleRepository.findAll(articleReq, pageable);
+        if ((long) pageable.getPageSize() * (pageable.getPageNumber() + 1) < redisTemplate.opsForList().size(articleReq.toString())) {
+            return getRedisArticle(articleReq, pageable);
+        }
+        return getDbArticle(articleReq, pageable);
     }
 
+    private List<ArticleDto> getRedisArticle(ArticleReq articleReq, Pageable pageable) {
+        long startIdx = (long) pageable.getPageNumber() * pageable.getPageSize();
+        long endIdx = startIdx + pageable.getPageSize() - 1;
+
+        if (endIdx > redisTemplate.opsForList().size(articleReq.toString())) {
+            endIdx = -1;
+        }
+
+        List<Long> articleId = redisTemplate.opsForList().range(articleReq.toString(), startIdx, endIdx).stream()
+                .filter(Objects::nonNull)
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+
+        return articleRepository.findAllById(articleReq.getUserId(), articleId);
+    }
+
+    private List<ArticleDto> getDbArticle(ArticleReq articleReq, Pageable pageable) {
+        return articleRepository.findAll(articleReq, pageable);
+    }
 
     @Override
     public ArticleDto selectArticle(Long userId, Long articleId) {
